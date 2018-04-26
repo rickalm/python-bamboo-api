@@ -417,12 +417,13 @@ class BambooAPIClient(object):
             # Note: do this here to keep it current with yields
             qs['start-index'] += results['max-result']
 
-    def get_projects(self):
+    def get_projects(self, max_result=25, start_index=0):
         """
         List all projects
         """
         url = "{}".format(self._get_url(self.PROJECT_SERVICE))
-        response = self._get_response(url).json()
+        qs = {'max-result': max_result, 'start-index': start_index}
+        response = self._get_response(url, qs).json()
         return response
 
     def get_project_by_key(self,key=None):
