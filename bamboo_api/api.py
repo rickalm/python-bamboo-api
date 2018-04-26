@@ -32,17 +32,22 @@ class BambooAPIClient(object):
 
     DELETE_ACTION = '/chain/admin/deleteChain!doDelete.action'
 
-    def __init__(self, host=None, port=None, user=None, password=None, prefix=None, verify=True ):
+    def __init__(self, host=None, port=None, user=None, password=None, prefix=None, verify=True, cert=None ):
         """
         Set connection and auth information (if user+password were provided).
         """
         self._host = host or self.DEFAULT_HOST
         self._port = port or self.DEFAULT_PORT
-        self._prefix = prefix or ''
+        self._prefix = prefix or '/'
         self._session = requests.Session()
         if user and password:
             self._session.auth = (user, password)
+
         self._session.verify = verify
+
+        if cert:
+          self._session.cert = cert
+          
 
     def _get_response(self, url, params=None):
         """
