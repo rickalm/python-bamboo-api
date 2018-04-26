@@ -137,17 +137,19 @@ class BambooAPIClient(object):
                 if nl is None:
                     break
 
-    def get_builds(self, plan_key=None, labels=None, expand=None, max_result=25):
+    def get_builds(self, plan_key=None, labels=None, expand=None, max_result=25, start_index=0):
         """
         Get the builds in the Bamboo server.
 
         :param plan_key: str
         :param labels: list str
         :param expand: list str
+        :param max_results: int, default 25
+        :param start_index: int, default 0
         :return: Generator
         """
         # Build starting qs params
-        qs = {'max-result': max_result, 'start-index': 0}
+        qs = {'max-result': max_result, 'start-index': start_index}
         if expand:
             qs['expand'] = self._build_expand(expand)
         if labels:
@@ -194,14 +196,16 @@ class BambooAPIClient(object):
         for r in response:
             yield r
 
-    def get_environment_results(self, environment_id, max_result=25):
+    def get_environment_results(self, environment_id, max_result=25, start_index=0):
         """
         Returns the list of environment results.
         :param environment_id: int
+        :param max_results: int, default 25
+        :param start_index: int, default 0
         :return: Generator
         """
         # Build starting qs params
-        qs = {'max-result': max_result, 'start-index': 0}
+        qs = {'max-result': max_result, 'start-index': start_index}
 
         # Get url for results
         url = self._get_url(self.ENVIRONMENT_SERVICE.format(env_id=environment_id))
@@ -219,14 +223,14 @@ class BambooAPIClient(object):
             # Note: do this here to keep it current with yields
             qs['start-index'] += response['max-result']
 
-    def get_plans(self, expand=None, max_result=25):
+    def get_plans(self, expand=None, max_result=25, start_index=0):
         """
         Return all the plans in a Bamboo server.
 
         :return: generator of plans
         """
         # Build starting qs params
-        qs = {'max-result': max_result, 'start-index': 0}
+        qs = {'max-result': max_result, 'start-index': start_index}
         if expand:
             qs['expand'] = self._build_expand(expand)
 
@@ -247,17 +251,19 @@ class BambooAPIClient(object):
             # Note: do this here to keep it current with yields
             qs['start-index'] += plans['max-result']
 
-    def get_branches(self, plan_key, enabled_only=False, max_result=25):
+    def get_branches(self, plan_key, enabled_only=False, max_result=25, start_index=0):
         """
         Return all branches in a plan.
 
         :param plan_key: str
         :param enabled_only: bool
+        :param max_results: int, default 25
+        :param start_index: int, default 0
 
         :return: Generator
         """
         # Build qs params
-        qs = {'max-result': max_result, 'start-index': 0}
+        qs = {'max-result': max_result, 'start-index': start_index}
         if enabled_only:
             qs['enabledOnly'] = 'true'
 
@@ -322,14 +328,17 @@ class BambooAPIClient(object):
         url = "{}".format(self._get_url(self.QUEUE_SERVICE))
         return self._get_response(url).json()
 
-    def get_results(self, plan_key=None, build_number=None, expand=None, max_result=25):
+    def get_results(self, plan_key=None, build_number=None, expand=None, max_result=25, start_index=0):
         """
         Returns a list of results for builds
         :param plan_key: str
+        :param build_number: str
+        :param max_results: int, default 25
+        :param start_index: int, default 0
         :return: Generator
         """
         # Build qs params
-        qs = {'max-result': max_result, 'start-index': 0}
+        qs = {'max-result': max_result, 'start-index': start_index}
         if expand:
             qs['expand'] = self._build_expand(expand)
 
@@ -353,7 +362,7 @@ class BambooAPIClient(object):
 
     def get_branch_results(self, plan_key, branch_name=None, expand=None, favorite=False,
                            labels=None, issue_keys=None, include_all_states=False,
-                           continuable=False, build_state=None, max_result=25):
+                           continuable=False, build_state=None, max_result=25, start_index=0):
         """
         Returns a list of results for plan branch builds
 
@@ -366,11 +375,13 @@ class BambooAPIClient(object):
         :param include_all_states: bool
         :param continuable: bool
         :param build_state: str
+        :param max_results: int, default 25
+        :param start_index: int, default 0
 
         :return: Generator
         """
         # Build qs params
-        qs = {'max-result': max_result, 'start-index': 0}
+        qs = {'max-result': max_result, 'start-index': start_index}
         if expand:
             qs['expand'] = self._build_expand(expand)
         if favorite:
@@ -411,6 +422,17 @@ class BambooAPIClient(object):
         List all projects
         """
         url = "{}".format(self._get_url(self.PROJECT_SERVICE))
+        response = self._get_response(url).json()
+        return response
+
+    def get_project_by_key(self,key=None):
+        """
+        Get project Info by Key
+        """
+        if not key:
+          return ""
+          
+        url = "{}/{}".format(self._get_url(self.PROJECT_SERVICE), key)
         response = self._get_response(url).json()
         return response
 
